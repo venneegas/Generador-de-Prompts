@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generador de prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@600;800&family=Saira+Semi+Condensed:wght@400;600&display=swap">
+<style>
+:root{--bg:#F4F7F7;--surface:#FFFFFF;--ink:#16262B;--muted:#5B6E73;--line:#D3DEDF;--accent:#0E6B6B;--accent-ink:#FFFFFF;--hi:#F2B544;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101A1D;--surface:#172429;--ink:#E8F0F0;--muted:#8FA5A9;--line:#2A3C41;--accent:#4FC3BC;--accent-ink:#06201F;--hi:#F2B544}}
+:root[data-theme="dark"]{--bg:#101A1D;--surface:#172429;--ink:#E8F0F0;--muted:#8FA5A9;--line:#2A3C41;--accent:#4FC3BC;--accent-ink:#06201F;--hi:#F2B544}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Saira Semi Condensed","Arial Narrow",system-ui,sans-serif;font-size:1.08rem;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 18px 48px}
+h1{font-family:"Saira Extra Condensed","Arial Narrow",Impact,sans-serif;font-size:clamp(2.8rem,10vw,5rem);line-height:.95;margin:0 0 10px;font-weight:800;letter-spacing:.01em}
+.lead{color:var(--muted);margin:0 0 22px;max-width:56ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.chip{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+form{display:grid;gap:14px}
+label{display:grid;gap:5px;font-weight:600;font-size:1.08rem}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{font:inherit;font-weight:400;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+textarea{resize:vertical;min-height:84px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--hi);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row{grid-template-columns:1fr}}
+.check{display:flex;gap:9px;align-items:flex-start;font-weight:400}
+.check input{width:auto;margin-top:5px}
+.out{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.ot{font-family:"Saira Extra Condensed","Arial Narrow",Impact,sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:.02em}
+.meter{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.mtxt{font-size:.85rem;color:var(--muted);margin:0 0 12px}
+pre{white-space:pre-wrap;word-wrap:break-word;margin:0 0 14px;font:inherit;font-size:1.05rem;min-height:180px;max-height:55vh;overflow:auto;background:var(--bg);border-radius:8px;padding:12px}
+.empty{color:var(--muted)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 18px;cursor:pointer;background:var(--hi);color:#16262B}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline-color:var(--ink)}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.msg{font-size:.9rem;color:var(--accent);min-height:1.3em;margin:8px 0 0}
+.wrap h1{padding-right:56px}
+.help{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:14px;width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);background:var(--surface);color:var(--accent);font-family:"Saira Extra Condensed","Arial Narrow",Impact,sans-serif;font-weight:800;font-size:1.7rem;line-height:1;cursor:pointer;z-index:20;padding:0}
+.help:hover{background:var(--accent);color:var(--accent-ink)}
+.ov{position:fixed;inset:0;background:rgba(10,20,22,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:30}
+.ov[hidden]{display:none}
+.card{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;max-width:500px;width:100%;max-height:85vh;overflow:auto;padding:20px 22px}
+.card h2{font-family:"Saira Extra Condensed","Arial Narrow",Impact,sans-serif;font-size:2rem;font-weight:800;line-height:1;margin:0 0 12px}
+.card ol,.card ul{margin:0 0 14px;padding-left:22px}
+.card li{margin-bottom:6px}
+.card h3{font-size:1.1rem;margin:14px 0 6px}
+</style>
+</head>
+<body>
+<button class="help" id="helpBtn" type="button" aria-label="Ayuda: cómo usar el generador" aria-haspopup="dialog">?</button>
+<div class="ov" id="ov" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">Cómo usar el generador</h2>
+    <ol>
+      <li>Elige una plantilla rápida o empieza con los campos vacíos.</li>
+      <li>Describe el objetivo con un verbo concreto: resumir, redactar, explicar.</li>
+      <li>Completa rol, público, tono, longitud y formato.</li>
+      <li>Escribe las restricciones, una por línea.</li>
+      <li>Revisa el indicador: te dice qué datos faltan.</li>
+      <li>Pulsa “Copiar prompt” y pégalo en un chat nuevo.</li>
+    </ol>
+    <h3>Consejos</h3>
+    <ul>
+      <li>En “Material o ejemplo” puedes pegar el texto de base o un modelo a imitar.</li>
+      <li>Marca las casillas finales si quieres que haga preguntas antes de responder o que revise su respuesta.</li>
+      <li>“Vaciar campos” reinicia todo para empezar de nuevo.</li>
+      <li>Si el resultado no te convence, ajusta un campo y vuelve a copiar.</li>
+    </ul>
+    <button class="btn" id="helpClose" type="button">Entendido</button>
+  </div>
+</div>
+<div class="wrap">
+  <h1>Generador de prompts</h1>
+  <p class="lead">Completa los campos y obtén un prompt claro y estructurado, listo para copiar. Cuantos más datos des, mejor será el resultado.</p>
+  <div class="chips" id="chips"></div>
+  <div class="grid">
+    <form id="f" autocomplete="off" onsubmit="return false">
+      <label>¿Qué quieres lograr?<small>Describe la tarea con un verbo concreto.</small>
+        <textarea id="objetivo" placeholder="Ej.: Resumir un artículo en cinco ideas clave"></textarea></label>
+      <label>Rol que debe adoptar
+        <input id="rol" placeholder="Ej.: editor profesional de contenidos"></label>
+      <label>Público destinatario
+        <input id="publico" placeholder="Ej.: estudiantes universitarios"></label>
+      <div class="row">
+        <label>Tono
+          <select id="tono"><option value="">Sin especificar</option><option>profesional</option><option>cercano</option><option>formal</option><option>didáctico</option><option>persuasivo</option><option>neutral</option></select></label>
+        <label>Longitud
+          <select id="longitud"><option value="">Sin especificar</option><option>muy breve (1-2 frases)</option><option>breve (un párrafo)</option><option>media (3-5 párrafos)</option><option>extensa y detallada</option></select></label>
+      </div>
+      <label>Formato de la respuesta
+        <select id="formato"><option value="">Sin especificar</option><option>texto en párrafos</option><option>lista con viñetas</option><option>lista numerada paso a paso</option><option>tabla</option><option>esquema con títulos</option><option>JSON</option></select></label>
+      <label>Restricciones<small>Una por línea.</small>
+        <textarea id="restricciones" placeholder="No usar tecnicismos&#10;Incluir un ejemplo práctico"></textarea></label>
+      <label>Material o ejemplo<small>Opcional. Pega aquí el texto de base o un modelo a imitar.</small>
+        <textarea id="material"></textarea></label>
+      <label class="check"><input type="checkbox" id="preguntas"> Permitir que haga preguntas aclaratorias antes de responder</label>
+      <label class="check"><input type="checkbox" id="verificar"> Pedir que revise su respuesta antes de entregarla</label>
+    </form>
+    <section class="out" aria-live="polite">
+      <strong class="ot">Tu prompt</strong>
+      <div class="meter"><i id="bar"></i></div>
+      <p class="mtxt" id="mtxt"></p>
+      <pre id="pre"></pre>
+      <div class="btns">
+        <button class="btn" id="copy" type="button">Copiar prompt</button>
+        <button class="btn sec" id="clear" type="button">Vaciar campos</button>
+      </div>
+      <p class="msg" id="msg"></p>
+    </section>
+  </div>
+</div>
+<script>
+var ids=["objetivo","rol","publico","tono","longitud","formato","restricciones","material"];
+var T={
+ "Resumir un texto":{objetivo:"Resumir el texto que te proporciono destacando las ideas principales",rol:"editor profesional",publico:"lectores con poco tiempo",tono:"neutral",longitud:"breve (un párrafo)",formato:"lista con viñetas",restricciones:"No añadir información que no esté en el texto\nMantener los datos y cifras exactos"},
+ "Redactar un correo":{objetivo:"Redactar un correo electrónico claro y accionable",rol:"asistente de comunicación corporativa",publico:"un cliente",tono:"profesional",longitud:"breve (un párrafo)",formato:"texto en párrafos",restricciones:"Incluir asunto\nTerminar con una llamada a la acción concreta"},
+ "Explicar un tema":{objetivo:"Explicar un tema complejo de forma sencilla",rol:"profesor con experiencia en divulgación",publico:"principiantes",tono:"didáctico",longitud:"media (3-5 párrafos)",formato:"esquema con títulos",restricciones:"Evitar tecnicismos sin definirlos\nIncluir un ejemplo práctico"},
+ "Escribir un cuento":{objetivo:"Escribir un cuento corto original",rol:"escritor profesional",publico:"lectores adultos",tono:"cercano",longitud:"media (3-5 párrafos)",formato:"texto en párrafos",restricciones:"Incluir un conflicto y un final claro\nEvitar clichés\nUsar diálogos breves"},
+ "Plan de estudio":{objetivo:"Crear un plan de estudio por días para preparar un examen",rol:"tutor académico",publico:"estudiante universitario",tono:"didáctico",longitud:"extensa y detallada",formato:"tabla",restricciones:"Dividir el contenido por días\nIncluir pausas y repasos\nProponer una autoevaluación al final"},
+ "Agenda de reunión":{objetivo:"Armar una agenda de 30 minutos para una reunión de equipo",rol:"coordinador de proyectos",publico:"equipo de trabajo",tono:"profesional",longitud:"breve (un párrafo)",formato:"lista numerada paso a paso",restricciones:"Asignar minutos a cada punto\nIncluir un cierre con acuerdos y responsables"},
+ "Revisar código":{objetivo:"Revisar el código que te paso, detectar errores y proponer mejoras",rol:"ingeniero de software senior",publico:"desarrollador de nivel intermedio",tono:"neutral",longitud:"media (3-5 párrafos)",formato:"lista numerada paso a paso",restricciones:"Explicar el porqué de cada cambio\nMostrar el código corregido"}
+};
+function $(i){return document.getElementById(i)}
+function v(i){return $(i).value.trim()}
+function build(){
+  var p=[];
+  if(v("rol"))p.push("Actúa como "+v("rol")+".");
+  if(v("objetivo"))p.push("Objetivo: "+v("objetivo")+".");
+  if(v("publico"))p.push("Público destinatario: "+v("publico")+".");
+  var est=[];
+  if(v("tono"))est.push("Tono: "+v("tono"));
+  if(v("longitud"))est.push("Longitud: "+v("longitud"));
+  if(v("formato"))est.push("Formato de salida: "+v("formato"));
+  if(est.length)p.push(est.join("\n"));
+  var r=v("restricciones").split("\n").map(function(s){return s.trim()}).filter(Boolean);
+  if(r.length)p.push("Restricciones:\n"+r.map(function(s){return "- "+s}).join("\n"));
+  if(v("material"))p.push("Material de base:\n\"\"\"\n"+v("material")+"\n\"\"\"");
+  var ex=[];
+  if($("preguntas").checked)ex.push("Si te falta información para hacerlo bien, hazme hasta tres preguntas antes de responder.");
+  if($("verificar").checked)ex.push("Antes de entregar la respuesta, revísala y corrige cualquier error o dato dudoso.");
+  if(ex.length)p.push(ex.join("\n"));
+  return p.join("\n\n");
+}
+function update(){
+  var t=build(),pre=$("pre");
+  if(t){pre.textContent=t;pre.className=""}else{pre.textContent="Escribe un objetivo para ver aquí tu prompt.";pre.className="empty"}
+  var L={objetivo:"el objetivo",rol:"el rol",publico:"el público",tono:"el tono",longitud:"la longitud",formato:"el formato",restricciones:"las restricciones"};
+  var keys=Object.keys(L),miss=keys.filter(function(k){return !v(k)}).map(function(k){return L[k]});
+  var pct=Math.round((keys.length-miss.length)/keys.length*100);
+  $("bar").style.width=pct+"%";
+  var j=miss.length>1?miss.slice(0,-1).join(", ")+" y "+miss[miss.length-1]:miss[0];
+  var s=miss.length?"Falta definir "+j+".":"Prompt completo.";
+  if(v("objetivo")&&v("objetivo").length<25)s+=" El objetivo es muy corto: añade más detalle.";
+  $("mtxt").textContent=s;
+}
+function fill(o){ids.forEach(function(k){$(k).value=o[k]||""});update()}
+Object.keys(T).forEach(function(n){
+  var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=n;
+  b.onclick=function(){fill(T[n])};$("chips").appendChild(b);
+});
+ids.concat(["preguntas","verificar"]).forEach(function(k){$(k).addEventListener("input",update);$(k).addEventListener("change",update)});
+$("clear").onclick=function(){fill({});$("preguntas").checked=false;$("verificar").checked=false;update();$("msg").textContent=""};
+$("copy").onclick=function(){
+  var t=build(),m=$("msg");
+  if(!t){m.textContent="Escribe un objetivo antes de copiar.";return}
+  function ok(){m.textContent="Prompt copiado."}
+  function fallback(){
+    var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();
+    try{document.execCommand("copy");ok()}catch(e){m.textContent="No se pudo copiar. Selecciona el texto y cópialo manualmente."}
+    document.body.removeChild(a);
+  }
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,fallback)}else{fallback()}
+  }catch(e){fallback()}
+};
+var ov=$("ov"),hb=$("helpBtn");
+function openHelp(){ov.hidden=false;$("helpClose").focus()}
+function closeHelp(){ov.hidden=true;hb.focus()}
+hb.onclick=openHelp;
+$("helpClose").onclick=closeHelp;
+ov.addEventListener("click",function(e){if(e.target===ov)closeHelp()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!ov.hidden)closeHelp()});
+update();
+</script>
+</body>
+</html>
